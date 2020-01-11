@@ -56,6 +56,7 @@ class ConnectFourGame {
 
       htmlBoard.append(tableRow);
     }
+    document.getElementById('start-button').innerHTML = 'RESTART';
   }
 
   /** findSpotForCol: given column x, return top empty y (null if filled) */
@@ -105,6 +106,7 @@ class ConnectFourGame {
     
     // check for win
     if (this.checkForWin()) {
+      console.log('WIMMER');
       return this.endGame(`Player ${this.currPlayer} won!`);
     }
     
@@ -120,21 +122,23 @@ class ConnectFourGame {
   /** checkForWin: check board cell-by-cell for "does a win start here?" */
 
   checkForWin() {
-    function _win(cells,height,width,board,currPlayer) {
+    function _win(cells) {
       // Check four cells to see if they're all color of current player
       //  - cells: list of four (y, x) cells
       //  - returns true if all are legal coordinates & all match currPlayer
-
+      // console.log(this);
       return cells.every(
-        ([y, x]) =>
-          y >= 0 &&
-          y < height &&
+        ([y, x]) => {
+          return y >= 0 &&
+          y < this.height &&
           x >= 0 &&
-          x < width &&
-          board[y][x] === currPlayer
+          x < this.width &&
+          this.board[y][x] === this.currPlayer
+          
+        }
       );
     }
-
+    let checkWinner = _win.bind(this);
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         // get "check list" of 4 cells (starting here) for each of the different
@@ -145,16 +149,23 @@ class ConnectFourGame {
         const diagDL = [[y, x], [y + 1, x - 1], [y + 2, x - 2], [y + 3, x - 3]];
 
         // find winner (only checking each win-possibility as needed)
-        if (_win(horiz,this.height,this.width,this.board,this.currPlayer) || _win(vert,this.height,this.width,this.board,this.currPlayer) || _win(diagDR,this.height,this.width,this.board,this.currPlayer) || _win(diagDL,this.height,this.width,this.board,this.currPlayer)) {
+        //console.log(this);
+        // console.log (checkWinner(vert));
+        if (checkWinner(horiz) || checkWinner(vert) || checkWinner(diagDR) || checkWinner(diagDL)) {
           return true;
         }
       }
     }
   }
-
+  startGame() {
+    document.getElementById('board').innerHTML = '';
+    this.board = [];
+    this.currPlayer = 1;
+    this.makeBoard();
+    this.makeHtmlBoard();
+  }
 }
 
 let connectFourGame = new ConnectFourGame(7,6);
 
-connectFourGame.makeBoard();
-connectFourGame.makeHtmlBoard();
+document.getElementById('start-button').addEventListener('click',connectFourGame.startGame.bind(connectFourGame));
